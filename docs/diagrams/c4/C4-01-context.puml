@@ -1,0 +1,24 @@
+@startuml C4-01-context
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title C4 - System Context | Parking Reservation System
+
+' People
+Person(employee, "Employé", "Réserve une place (max 5 jours), confirme, check-in via QR, consulte ses réservations.")
+Person(manager, "Manager", "Réserve (max 30 jours) et consulte le dashboard de statistiques.")
+Person(secretary, "Secrétaire (Admin)", "Gère les utilisateurs, modifie/annule les réservations, consulte tout l’historique.")
+
+' System
+System(parkingSystem, "Parking Reservation System", "Application web (SPA) + API backend pour réserver des places, gérer check-in et historique.")
+
+' External system(s)
+System_Ext(emailService, "Service E-mail (externe)", "Consomme les messages de notification et envoie les e-mails de confirmation/annulation.")
+
+' Relationships
+Rel(employee, parkingSystem, "Utilise pour réserver / confirmer / check-in", "HTTPS")
+Rel(manager, parkingSystem, "Utilise pour réserver et consulter le dashboard", "HTTPS")
+Rel(secretary, parkingSystem, "Utilise pour administrer utilisateurs et réservations", "HTTPS")
+
+Rel(parkingSystem, emailService, "Publie des événements de réservation", "AMQP (RabbitMQ)")
+
+@enduml

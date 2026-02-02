@@ -1,0 +1,43 @@
+@startuml C4-02-container
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title C4 - Container | Parking Reservation System
+
+' People
+Person(employee, "Employé", "Réserve une place, confirme, check-in QR, consulte ses réservations.")
+Person(manager, "Manager", "Réserve jusqu’à 30 jours + dashboard.")
+Person(secretary, "Secrétaire (Admin)", "Back-office complet (users, réservations, historique).")
+
+' System boundary
+System_Boundary(s1, "Parking Reservation System") {
+
+  Container(spa, "Frontend SPA", "React + TypeScript + Vite (build) + Nginx (serve)", "UI responsive mobile-first, scan QR via navigateur.")
+  Container(api, "Backend API", "Java 21 + Spring Boot", "API REST /api/v1, règles métier, auth JWT, orchestration réservation/check-in.")
+  ContainerDb(db, "Database", "MySQL 8 (InnoDB)", "Stockage transactionnel: users, spots, reservations, historique, refresh tokens.")
+  Container(queue, "Message Broker", "RabbitMQ", "Queueing AMQP pour notifications e-mail (événements réservation).")
+}
+
+System_Ext(emailService, "Service E-mail (externe)", "Consomme les événements et envoie les confirmations/annulations.")
+
+' Relationships (User to SPA)
+Rel(employee, spa, "Utilise", "HTTPS")
+Rel(manager, spa, "Utilise", "HTTPS")
+Rel(secretary, spa, "Utilise", "HTTPS")
+
+' SPA to API
+Rel(spa, api, "Appelle l’API REST (JWT Bearer)", "HTTPS / JSON")
+
+' API to DB + Queue
+Rel(api, db, "Lit/écrit", "JPA/Hibernate (SQL)")
+Rel(api, queue, "Publie événements (RESERVATIONS)", "AMQP")
+
+' Email service consumes
+Rel(emailService, queue, "Consomme messages + ACK", "AMQP")
+
+' Notes (Docker Compose)
+Lay_Down(spa, api)
+Lay_Down(api, db)
+Lay_Right(queue, db)
+Lay_Right(emailService, queue)
+
+@enduml
