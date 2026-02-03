@@ -78,3 +78,136 @@ body {
   padding: 2rem;
   color: #d32f2f;
 }
+
+/* Date selector */
+.date-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.date-selector input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+/* Reserved spot indicator */
+.parking-spot.reserved {
+  background-color: #ffebee;
+  border-color: #f44336;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.parking-spot:not(.reserved) {
+  cursor: pointer;
+}
+
+.parking-spot:not(.reserved):hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  min-width: 320px;
+  max-width: 90%;
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.modal-actions button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  background-color: white;
+}
+
+.btn-primary {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #1565c0 !important;
+}
+
+.btn-primary:disabled {
+  background-color: #90caf9 !important;
+  cursor: not-allowed;
+}
+
+.modal-error {
+  color: #d32f2f;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.charger-note {
+  color: #4caf50;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.weekend-note {
+  color: #666;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.weekend-warning {
+  color: #f44336;
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 0.25rem;
+}

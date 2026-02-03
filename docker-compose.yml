@@ -38,13 +38,28 @@ services:
       timeout: 5s
       retries: 10
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: parking-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: parking_user
+      PMA_PASSWORD: parking_pass
+    ports:
+      - "8888:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - parking-net
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: parking-backend
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/parking?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: parking_user
