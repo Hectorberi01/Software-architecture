@@ -18,8 +18,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r.parkingSpot.id FROM Reservation r WHERE r.reservationDate = :date")
     List<Long> findReservedSpotIdsByDate(LocalDate date);
 
-    @Query("SELECT COUNT(r) FROM Reservation r WHERE r.userEmail = :email AND r.reservationDate >= :today")
-    long countActiveReservationsByEmail(String email, LocalDate today);
+    @Query("SELECT COUNT(r) FROM Reservation r WHERE r.user.id = :userId AND r.reservationDate >= :today")
+    long countActiveReservationsByUserId(Long userId, LocalDate today);
 
-    List<Reservation> findByUserEmailAndReservationDateGreaterThanEqual(String email, LocalDate date);
+    List<Reservation> findByUserIdAndReservationDateGreaterThanEqual(Long userId, LocalDate date);
+
+    List<Reservation> findByUserIdAndReservationDateLessThan(Long userId, LocalDate date);
 }

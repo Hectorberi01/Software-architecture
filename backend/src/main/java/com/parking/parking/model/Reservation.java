@@ -16,8 +16,9 @@ public class Reservation {
     @JoinColumn(name = "parking_spot_id", nullable = false)
     private ParkingSpot parkingSpot;
 
-    @Column(name = "user_email", nullable = false)
-    private String userEmail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "reservation_date", nullable = false)
     private LocalDate reservationDate;
@@ -27,11 +28,11 @@ public class Reservation {
 
     public Reservation() {}
 
-    public Reservation(Long id, ParkingSpot parkingSpot, String userEmail,
+    public Reservation(Long id, ParkingSpot parkingSpot, User user,
                        LocalDate reservationDate, LocalDateTime createdAt) {
         this.id = id;
         this.parkingSpot = parkingSpot;
-        this.userEmail = userEmail;
+        this.user = user;
         this.reservationDate = reservationDate;
         this.createdAt = createdAt;
     }
@@ -47,8 +48,12 @@ public class Reservation {
     public ParkingSpot getParkingSpot() { return parkingSpot; }
     public void setParkingSpot(ParkingSpot parkingSpot) { this.parkingSpot = parkingSpot; }
 
-    public String getUserEmail() { return userEmail; }
-    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public String getUserEmail() {
+        return user != null ? user.getEmail() : null;
+    }
 
     public LocalDate getReservationDate() { return reservationDate; }
     public void setReservationDate(LocalDate reservationDate) { this.reservationDate = reservationDate; }

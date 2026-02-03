@@ -4,6 +4,6 @@ import java.time.LocalDate;
 
 public record CreateReservationRequest(
     Long parkingSpotId,
-    String userEmail,
+    Long userId,
     LocalDate reservationDate
 ) {}

@@ -4,8 +4,10 @@ import com.parking.parking.dto.CreateReservationRequest;
 import com.parking.parking.dto.ReservationDto;
 import com.parking.parking.model.ParkingSpot;
 import com.parking.parking.model.Reservation;
+import com.parking.parking.model.User;
 import com.parking.parking.repository.ParkingSpotRepository;
 import com.parking.parking.repository.ReservationRepository;
+import com.parking.parking.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,16 +37,26 @@ class ReservationServiceTest {
     private ParkingSpotRepository parkingSpotRepository;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private ReservationService reservationService;
 
     private ParkingSpot sampleSpot;
+    private User sampleUser;
 
     @BeforeEach
     void setUp() {
         sampleSpot = new ParkingSpot(1L, "A01", "A", 1, true);
+        sampleUser = new User();
+        sampleUser.setId(42L);
+        sampleUser.setEmail("test@email.com");
+        sampleUser.setPasswordHash("hash");
+        sampleUser.setFirstName("Test");
+        sampleUser.setLastName("User");
     }
 
     private LocalDate getNextWeekday() {
@@ -68,10 +80,11 @@ class ReservationServiceTest {
     void createReservation_shouldSucceedForValidRequest() {
         LocalDate futureDate = getNextWeekday();
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, "test@email.com", futureDate
+            1L, sampleUser.getId(), futureDate
         );
 
-        when(reservationRepository.countActiveReservationsByEmail(eq("test@email.com"), any(LocalDate.class)))
+        when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(reservationRepository.countActiveReservationsByUserId(eq(sampleUser.getId()), any(LocalDate.class)))
             .thenReturn(0L);
         when(reservationRepository.existsByParkingSpotIdAndReservationDate(1L, futureDate))
             .thenReturn(false);
@@ -88,6 +101,7 @@ class ReservationServiceTest {
 
         assertThat(result.parkingSpotId()).isEqualTo(1L);
         assertThat(result.spotCode()).isEqualTo("A01");
+        assertThat(result.userId()).isEqualTo(sampleUser.getId());
         assertThat(result.userEmail()).isEqualTo("test@email.com");
         assertThat(result.reservationDate()).isEqualTo(futureDate);
         verify(rabbitTemplate).convertAndSend(eq("parking.notifications"),
@@ -99,8 +113,9 @@ class ReservationServiceTest {
     void createReservation_shouldFailForPastDate() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, "test@email.com", pastDate
+            1L, sampleUser.getId(), pastDate
         );
+        when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
             .isInstanceOf(IllegalArgumentException.class)
@@ -112,10 +127,11 @@ class ReservationServiceTest {
     void createReservation_shouldFailWhenSpotAlreadyReserved() {
         LocalDate futureDate = getNextWeekday();
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, "test@email.com", futureDate
+            1L, sampleUser.getId(), futureDate
         );
 
-        when(reservationRepository.countActiveReservationsByEmail(eq("test@email.com"), any(LocalDate.class)))
+        when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(reservationRepository.countActiveReservationsByUserId(eq(sampleUser.getId()), any(LocalDate.class)))
             .thenReturn(0L);
         when(reservationRepository.existsByParkingSpotIdAndReservationDate(1L, futureDate))
             .thenReturn(true);
@@ -130,10 +146,11 @@ class ReservationServiceTest {
     void createReservation_shouldFailWhenMaxReservationsReached() {
         LocalDate futureDate = getNextWeekday();
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, "test@email.com", futureDate
+            1L, sampleUser.getId(), futureDate
         );
 
-        when(reservationRepository.countActiveReservationsByEmail(eq("test@email.com"), any(LocalDate.class)))
+        when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(reservationRepository.countActiveReservationsByUserId(eq(sampleUser.getId()), any(LocalDate.class)))
             .thenReturn(5L);
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
@@ -146,8 +163,9 @@ class ReservationServiceTest {
     void createReservation_shouldFailForWeekend() {
         LocalDate saturday = getNextSaturday();
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, "test@email.com", saturday
+            1L, sampleUser.getId(), saturday
         );
+        when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
             .isInstanceOf(IllegalArgumentException.class)
@@ -160,7 +178,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation();
         reservation.setId(100L);
         reservation.setParkingSpot(sampleSpot);
-        reservation.setUserEmail("test@email.com");
+        reservation.setUser(sampleUser);
         reservation.setReservationDate(LocalDate.now().plusDays(1));
 
         when(reservationRepository.findById(100L)).thenReturn(Optional.of(reservation));
@@ -170,5 +188,33 @@ class ReservationServiceTest {
         verify(reservationRepository).delete(reservation);
         verify(rabbitTemplate).convertAndSend(eq("parking.notifications"),
             eq("reservation.cancelled"), anyString());
+    }
+
+    @Test
+    @DisplayName("getReservationHistory returns active and past reservations for a user")
+    void getReservationHistory_shouldReturnActiveAndPast() {
+        Reservation active = new Reservation();
+        active.setId(1L);
+        active.setParkingSpot(sampleSpot);
+        active.setUser(sampleUser);
+        active.setReservationDate(LocalDate.now().plusDays(2));
+
+        Reservation past = new Reservation();
+        past.setId(2L);
+        past.setParkingSpot(sampleSpot);
+        past.setUser(sampleUser);
+        past.setReservationDate(LocalDate.now().minusDays(2));
+
+        when(reservationRepository.findByUserIdAndReservationDateGreaterThanEqual(eq(sampleUser.getId()), any(LocalDate.class)))
+            .thenReturn(java.util.List.of(active));
+        when(reservationRepository.findByUserIdAndReservationDateLessThan(eq(sampleUser.getId()), any(LocalDate.class)))
+            .thenReturn(java.util.List.of(past));
+
+        var history = reservationService.getReservationHistory(sampleUser.getId());
+
+        assertThat(history.activeReservations()).hasSize(1);
+        assertThat(history.pastReservations()).hasSize(1);
+        assertThat(history.activeReservations().get(0).id()).isEqualTo(1L);
+        assertThat(history.pastReservations().get(0).id()).isEqualTo(2L);
     }
 }

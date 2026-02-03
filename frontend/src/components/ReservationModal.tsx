@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ParkingSpot, CreateReservationRequest } from '../types/types'
+import { useAuth } from '../contexts/AuthContext'
 
 interface ReservationModalProps {
   spot: ParkingSpot
@@ -15,7 +16,7 @@ function isWeekend(dateString: string): boolean {
 }
 
 function ReservationModal({ spot, selectedDate, onClose, onReserve }: ReservationModalProps) {
-  const [email, setEmail] = useState('')
+  const { user } = useAuth()
   const [date, setDate] = useState(selectedDate)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -31,13 +32,18 @@ function ReservationModal({ spot, selectedDate, onClose, onReserve }: Reservatio
       return
     }
 
+    if (!user) {
+      setError('Veuillez vous connecter pour réserver')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
     try {
       await onReserve({
         parkingSpotId: spot.id,
-        userEmail: email,
+        userId: user.id,
         reservationDate: date,
       })
       onClose()
@@ -48,6 +54,8 @@ function ReservationModal({ spot, selectedDate, onClose, onReserve }: Reservatio
     }
   }
 
+  const isSubmitDisabled = loading || isDateWeekend || !user
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -55,16 +63,9 @@ function ReservationModal({ spot, selectedDate, onClose, onReserve }: Reservatio
         {spot.hasCharger && <p className="charger-note">Cette place dispose d'une borne de recharge</p>}
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="votre@email.com"
-            />
+          <div className="form-group read-only">
+            <label>Utilisateur</label>
+            <input type="email" value={user?.email ?? ''} placeholder="Connexion requise" readOnly />
           </div>
 
           <div className="form-group">
@@ -88,7 +89,7 @@ function ReservationModal({ spot, selectedDate, onClose, onReserve }: Reservatio
             <button type="button" onClick={onClose} disabled={loading}>
               Annuler
             </button>
-            <button type="submit" className="btn-primary" disabled={loading || isDateWeekend}>
+            <button type="submit" className="btn-primary" disabled={isSubmitDisabled}>
               {loading ? 'Reservation...' : 'Reserver'}
             </button>
           </div>

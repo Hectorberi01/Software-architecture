@@ -2,6 +2,7 @@ package com.parking.parking.controller;
 
 import com.parking.parking.dto.CreateReservationRequest;
 import com.parking.parking.dto.ReservationDto;
+import com.parking.parking.dto.UserReservationHistoryDto;
 import com.parking.parking.service.ReservationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,15 +50,25 @@ public class ReservationController {
 
     @GetMapping("/user")
     public ResponseEntity<List<ReservationDto>> getUserReservations(
-            @RequestParam String email) {
-        List<ReservationDto> reservations = reservationService.getActiveReservationsByEmail(email);
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "active") String status) {
+        List<ReservationDto> reservations = "past".equalsIgnoreCase(status)
+            ? reservationService.getPastReservationsByUser(userId)
+            : reservationService.getActiveReservationsByUser(userId);
         return ResponseEntity.ok(reservations);
+    }
+
+    @GetMapping("/user/history")
+    public ResponseEntity<UserReservationHistoryDto> getUserReservationHistory(
+            @RequestParam Long userId) {
+        UserReservationHistoryDto history = reservationService.getReservationHistory(userId);
+        return ResponseEntity.ok(history);
     }
 
     @GetMapping("/user/count")
     public ResponseEntity<Long> getUserReservationCount(
-            @RequestParam String email) {
-        long count = reservationService.countActiveReservations(email);
+            @RequestParam Long userId) {
+        long count = reservationService.countActiveReservations(userId);
         return ResponseEntity.ok(count);
     }
 }
