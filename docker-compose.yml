@@ -53,6 +53,8 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+      APP_JWT_SECRET: 5468696e6b696e67546f6f4d7563684d616b65734d65576f6e64657257686174536563726574436f756c644265555365644865726521
+      APP_JWT_EXPIRATION: 900000
     depends_on:
       db:
         condition: service_healthy
@@ -67,7 +69,7 @@ services:
       dockerfile: Dockerfile
     container_name: parking-frontend
     ports:
-      - "3000:80"
+      - "3001:80"
     depends_on:
       - backend
     networks:
