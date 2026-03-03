@@ -1,0 +1,16 @@
+src/api/parkingApi.ts(1,36): error TS6133: 'ReservationStatus' is declared but its value is never read.
+src/App.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/ui/DataTable.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/components/ui/Modal.tsx(2,1): error TS6133: 'Button' is declared but its value is never read.
+src/pages/AdminPage.tsx(5,49): error TS2305: Module '"../components/ui"' has no exported member 'Column'.
+src/pages/AdminPage.tsx(85,37): error TS7006: Parameter 'u' implicitly has an 'any' type.
+src/pages/AdminPage.tsx(86,38): error TS7006: Parameter 'u' implicitly has an 'any' type.
+src/pages/AdminPage.tsx(87,39): error TS7006: Parameter 'u' implicitly has an 'any' type.
+src/pages/AdminPage.tsx(90,24): error TS7006: Parameter 'user' implicitly has an 'any' type.
+src/pages/ReservationsPage.tsx(6,42): error TS2305: Module '"../components/ui"' has no exported member 'Column'.
+src/pages/ReservationsPage.tsx(71,93): error TS2339: Property 'id' does not exist on type 'User'.
+src/pages/ReservationsPage.tsx(78,39): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/pages/ReservationsPage.tsx(79,37): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/pages/ReservationsPage.tsx(80,40): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/pages/ReservationsPage.tsx(83,24): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/pages/ReservationsPage.tsx(90,69): error TS2339: Property 'id' does not exist on type 'User'.
