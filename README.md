@@ -9,13 +9,14 @@ Ce dépôt contient l'ensemble du code source, la documentation architecturale e
 ##  Fonctionnalités Principales
 
 - **Système de rôles avancés (RBAC) :**
-  - **Employé :** Peut réserver une place pour un maximum de 5 jours ouvrables. Doit procéder au check-in quotidiennement.
-  - **Manager :** Accède à un tableau de bord analytique et possède une flexibilité de réservation (jusqu'à 30 jours calendaires continus).
-  - **Secrétaire (Admin) :** Gère les utilisateurs et toutes les réservations, gère les profils nécessitant un accès de long terme.
+  - **Employé :** Peut demander une place pour un maximum de 5 jours ouvrables. La réservation passe en état `En attente d'approbation`. Doit procéder au check-in quotidiennement une fois la réservation approuvée.
+  - **Manager :** Peut approuver / refuser les réservations des employés. Accède à un tableau de bord analytique et possède une flexibilité de réservation (jusqu'à 30 jours calendaires continus).
+  - **Secrétaire (Admin) :** Gère les utilisateurs et toutes les réservations (possède les mêmes droits d'approbation que le manager), gère les profils nécessitant un accès de long terme.
 - **Gestion des Bornes de Recharge :** Les rangées A et F sont équipées de bornes électriques (affichage dynamique  sur l'UI).
-- **Processus de Check-in (QR Code) :** Points d'accès dédiés permettant la validation de la réservation. Une tâche planifiée (CRON) libère automatiquement les places non réclamées à 11h00 (No-Show).
+- **Flux d'Approbation :** Toute nouvelle réservation est créée sous le statut `PENDING`. Un Manager ou un Admin peut l'approuver (`APPROVED`) pour la rendre valide et permettre le check-in, ou la refuser (`REJECTED`).
+- **Processus de Check-in (QR Code) :** Points d'accès dédiés permettant la validation de la réservation (uniquement pour les réservations approuvées). Une tâche planifiée (CRON) libère automatiquement les places non réclamées à 11h00 (No-Show).
 - **Tableau de Bord Analytique :** Calcul du taux d'occupation, des statistiques de non-présentation et graphiques d'usage.
-- **Notifications Asynchrones :** Envoi d'e-mails de confirmation (simulés) déchargés du flux principal via une file de messages (Event-Driven).
+- **Notifications Asynchrones :** Envoi d'e-mails de notification (simulés dans les logs du serveur) confirmant la prise en compte de la demande de réservation via un *Consumer* RabbitMQ (Event-Driven).
 
 ---
 
